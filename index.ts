@@ -1,7 +1,12 @@
-import { httpServer } from "./src/http_server/index";
-import { mouse } from "@nut-tree/nut-js";
+import * as dotenv from 'dotenv';
+dotenv.config();
+import { httpServer } from "./src/http_server/httpServer";
+import { createWsServer } from "./src//wsServer";
+import { remoteController } from "./src/remoteControl";
 
-const HTTP_PORT = 8181;
+const HTTP_PORT = process.env.HTTP_PORT;
+const WS_PORT = Number(process.env.WS_PORT) || 8181;
 
-console.log(`Start static http server on the ${HTTP_PORT} port!`);
+process.stdout.write(`Start static http server on the ${HTTP_PORT} port!\n`);
 httpServer.listen(HTTP_PORT);
+createWsServer(WS_PORT, remoteController);
