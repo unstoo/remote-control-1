@@ -6,7 +6,6 @@ export const createWsServer = (
   PORT: number,
   wsController: (data: string) => Promise<{
     error: boolean;
-    result: string;
   }>
 ) => {
   const wss = new WebSocketServer({
@@ -36,12 +35,12 @@ export const createWsServer = (
     ws.on('message', async function message(data) {
       const parsedData = data.toString();
       process.stdout.write('received: ' + parsedData + '\n');
-      const { error, result } = await wsController(parsedData);
+      const { error } = await wsController(parsedData);
       if (error) {
-        ws.send('failed: ' + parsedData);
+        ws.send(parsedData);
         process.stderr.write('failed: ' + parsedData + '\n');
       } else {
-        ws.send('success: ' + result);
+        ws.send(parsedData);
       }
     });
   });
