@@ -1,7 +1,7 @@
 import { mouse, left, right, up, down, Button, Point, straightTo } from "@nut-tree/nut-js";
 
 export type Router = {
-  [key: string]: (args: any) => Promise<void>
+  [key: string]: (args: any) => Promise<any>
 };
 
 const actions: Router = {
@@ -18,12 +18,12 @@ const actions: Router = {
     await mouse.move(right(args[0]));
   },
   'draw_circle': async (args: number[]) => {
-    const postion = await mouse.getPosition();
+    const pos = await mouse.getPosition();
     const points = [];
     for (let angle = 0; angle <= 360; angle += 3) {
       const rad = angle * (Math.PI / 180)
-      const x = (postion.x - args[0]) + args[0] * Math.cos(rad);
-      const y = postion.y + args[0] * Math.sin(rad);
+      const x = (pos.x - args[0]) + args[0] * Math.cos(rad);
+      const y = pos.y + args[0] * Math.sin(rad);
       points.push([x, y]);
     }
     
@@ -56,10 +56,15 @@ const actions: Router = {
     await mouse.releaseButton(Button.LEFT);
     mouse.config.mouseSpeed = defaultSpeed;
   },
+  'mouse_position': async () => {
+    const { x, y } = await mouse.getPosition();
+    return `mouse_position ${x},${y}`;
+  },
 };
 
 export const remoteController = async (data: string) => {
   const [name, ...args] = data.split(' ');
+  console.log({ args })
   const parsedArgs = args.map(Number);
   const action = actions[name];
   if (action === undefined) {
@@ -67,8 +72,9 @@ export const remoteController = async (data: string) => {
       error: true,
     };
   }
-  await action(parsedArgs);
+  const answer = await action(parsedArgs);
   return {
     error: false,
+    answer: answer,
   };
 };
