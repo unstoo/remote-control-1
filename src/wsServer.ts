@@ -6,7 +6,7 @@ export const createWsServer = (
   PORT: number,
   wsController: (data: string) => Promise<{
     error: boolean;
-    answer?: string;
+    answer: string | void;
   }>
 ) => {
   (new WebSocket.Server({ port: PORT })).on('connection', function (ws) {
