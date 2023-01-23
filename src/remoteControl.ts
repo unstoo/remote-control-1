@@ -64,7 +64,6 @@ const actions: Router = {
 
 export const remoteController = async (data: string) => {
   const [name, ...args] = data.split(' ');
-  console.log({ args })
   const parsedArgs = args.map(Number);
   const action = actions[name];
   if (action === undefined) {

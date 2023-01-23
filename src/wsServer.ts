@@ -1,5 +1,5 @@
-import { WebSocketServer } from 'ws';
-
+import { EOL } from 'node:os';
+import WebSocket from 'ws';
 
 
 export const createWsServer = (
@@ -9,27 +9,22 @@ export const createWsServer = (
     answer?: string;
   }>
 ) => {
-  const wss = new WebSocketServer({
-    port: PORT || 8080,
-  });
-  
-  wss.on('connection', function connection(ws) {
-    ws.on('message', async function message(data) {
-      const parsedData = data.toString();
-      process.stdout.write('received: ' + parsedData + '\n');
-      const { error, answer } = await wsController(parsedData);
-      if (error) {
-        ws.send(parsedData);
-        process.stderr.write('failed: ' + parsedData + '\n');
-      } else {
-        answer && ws.send(answer);
-      }
+  (new WebSocket.Server({ port: PORT })).on('connection', function (ws) {
+    const duplex = WebSocket.createWebSocketStream(ws, { 
+      encoding: 'utf8',
+      decodeStrings: false,
+    });
+
+    duplex.on('data', async (data) => {
+        const { error, answer } = await wsController(data);
+
+        if (error) {
+          duplex.write('error' + EOL)
+        } else if (answer) {
+          duplex.write(answer + EOL)
+        } else {
+          duplex.write(data + EOL)
+        }
     });
   });
-  
-  wss.on('error', (error) => {
-    process.stderr.write('websocket error: ' + error);
-  });
-
-  return wss;
 };
